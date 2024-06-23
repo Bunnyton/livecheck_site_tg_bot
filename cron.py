@@ -33,16 +33,18 @@ async def check_website(website):
         status_code = -1
         text += '\n' + str(e)
     
-    # Проверка изменения статуса и отправка сообщения в Telegram, если он изменился
     if status_code != website.last_status_code:
         website.last_status_code = status_code
         website.save()
-        if website.message_thread_id != 0:
-            await bot.send_message(chat_id=website.chat_id, message_thread_id=website.message_thread_id,
-                           text=f"Status code changed for {website.url}. Current is {status_code}.{text}")
-        else:
-            await bot.send_message(chat_id=website.chat_id,
-                           text=f"Status code changed for {website.url}. Current is {status_code}.{text}")
+        try:
+            if website.message_thread_id != 0:
+                await bot.send_message(chat_id=website.chat_id, message_thread_id=website.message_thread_id,
+                               text=f"Status code changed for {website.url}. Current is {status_code}.{text}")
+            else:
+                await bot.send_message(chat_id=website.chat_id,
+                               text=f"Status code changed for {website.url}. Current is {status_code}.{text}")
+        except Exception as e:
+            print("Send message ERROR")
 
 # Асинхронная функция для проверки всех веб-сайтов
 async def main():
