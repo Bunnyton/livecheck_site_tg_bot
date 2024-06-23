@@ -39,7 +39,7 @@ async def check_website(website):
                     text += f"\n\nRedirects:\n" + "\n".join(redirects)
 
     except aiohttp.ClientError as e:
-        if is_internet_available():
+        if await is_internet_available():
             status_code = -1
             text += '\n' + str(e)
         else:
