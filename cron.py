@@ -20,7 +20,7 @@ async def is_internet_available():
         return False
 
 
-async def check_website(website):
+async def check_website(website, retry=False):
     url = website.url
 
     status_code = 0
@@ -39,11 +39,15 @@ async def check_website(website):
                     text += f"\n\nRedirects:\n" + "\n".join(redirects)
 
     except aiohttp.ClientError as e:
-        if await is_internet_available():
+        if retry:
             status_code = -1
             text += '\n' + str(e)
+        elif await is_internet_available():
+            time.sleep(1)
+            await check_website(website, retry=True)
         else:
             return
+
     except Exception as e:
         print(str(e))
         return
