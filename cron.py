@@ -5,6 +5,7 @@ import telegram
 from settings import TELEGRAM_API_KEY
 from data import Website
 import ssl
+import time
 
 # Загрузка API ключа Telegram и настройка бота
 bot = telegram.Bot(token=TELEGRAM_API_KEY)
@@ -47,4 +48,6 @@ async def main():
 
 # Запуск основной асинхронной функции
 if __name__ == "__main__":
-    asyncio.run(main())
+    while True:
+        asyncio.run(main())
+        time.sleep(15)
