@@ -3,18 +3,22 @@ version: '3'
 services:
   bot:
     build: .
+    working_dir: /app
     volumes:
-      - "./data.db:/app/data.db"
+      - "./data:/app/data"
     ports:
       - "8080:80"
       - "8443:443"
     command: ["python3", "main.py"]
+    restart: always
 
   cronos:
     build: .
+    working_dir: /app
     volumes:
-      - "./data.db:/app/data.db"
+      - "./data:/app/data"
     ports:
       - "80:80"
       - "443:443"
     command: ["python3", "cron.py"]
+    restart: always

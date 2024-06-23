@@ -52,7 +52,12 @@ async def add(update, context):
     website_count = (Website.select().where((Website.chat_id == update.message.chat_id) & (Website.url == url)).count())
     print(website_count)
     if website_count == 0:
-        website = Website(chat_id=update.message.chat_id, url=url)
+
+        thread_id = 0
+        if update.message.message_thread_id:
+            thread_id = update.message.message_thread_id
+
+        website = Website(chat_id=update.message.chat_id, url=url, message_thread_id=thread_id)
         print('ok1')
         website.save(force_insert=True)
         print('ok2')
@@ -69,12 +74,10 @@ async def add(update, context):
 async def delete(update, context):
     # botan.track(BOTAN_TOKEN, update.message.chat_id, update.message.to_dict(), 'delete')
     url = context.args[0].lower()
-    website = Website.get((Website.chat_id == update.message.chat_id) & (Website.url == url))
-    if website:
-        website.delete_instance()
+    try:
+        website = Website.get((Website.chat_id == update.message.chat_id) & (Website.url == url))
         await update.message.reply_text(" ".join(["Deleted", url]))
-        # bot.sendMessage(chat_id=update.message.chat_id, text="Deleted %s" % url)
-    else:
+    except Website.DoesNotExist:
         await update.message.reply_text(" ".join(["Website", url, "is not exists"]))
         # bot.sendMessage(chat_id=update.message.chat_id, text="Website %s is not exists" % url)
 

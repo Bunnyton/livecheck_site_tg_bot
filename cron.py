@@ -17,6 +17,10 @@ async def check_website(website, ssl_context):
     status_code = 0
     text = str()
     try:
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+
         async with aiohttp.ClientSession() as session:
             async with session.head(url, ssl=ssl_context, allow_redirects=True) as response:
                 status_code = response.status
@@ -33,21 +37,22 @@ async def check_website(website, ssl_context):
     if status_code != website.last_status_code:
         website.last_status_code = status_code
         website.save()
-        await bot.send_message(chat_id=website.chat_id,
-                       text=f"Status code changed for {website.url}. Current is {status_code}.{text}")
+        if website.message_thread_id != 0:
+            await bot.send_message(chat_id=website.chat_id, message_thread_id=website.message_thread_id,
+                           text=f"Status code changed for {website.url}. Current is {status_code}.{text}")
+        else:
+            await bot.send_message(chat_id=website.chat_id,
+                           text=f"Status code changed for {website.url}. Current is {status_code}.{text}")
 
 # Асинхронная функция для проверки всех веб-сайтов
 async def main():
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
-
     websites = Website.select()
     tasks = [check_website(website, ssl_context) for website in websites]
     await asyncio.gather(*tasks)
 
 # Запуск основной асинхронной функции
 if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
     while True:
-        asyncio.run(main())
-        time.sleep(15)
+        loop.run_until_complete(main())
+        time.sleep(10)
