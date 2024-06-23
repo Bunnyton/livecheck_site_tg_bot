@@ -10,7 +10,16 @@ import time
 # Загрузка API ключа Telegram и настройка бота
 bot = telegram.Bot(token=TELEGRAM_API_KEY)
 
-# Функция для проверки статуса веб-сайтов
+
+async def is_internet_available():
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get('https://www.google.com', timeout=3):
+                return True
+    except (aiohttp.ClientError, asyncio.TimeoutError):
+        return False
+
+
 async def check_website(website):
     url = website.url
 
@@ -30,8 +39,14 @@ async def check_website(website):
                     text += f"\n\nRedirects:\n" + "\n".join(redirects)
 
     except aiohttp.ClientError as e:
-        status_code = -1
-        text += '\n' + str(e)
+        if is_internet_available():
+            status_code = -1
+            text += '\n' + str(e)
+        else:
+            return
+    except Exception as e:
+        print(str(e))
+        return
     
     if status_code != website.last_status_code:
         website.last_status_code = status_code
@@ -46,7 +61,7 @@ async def check_website(website):
         except Exception as e:
             print("Send message ERROR")
 
-# Асинхронная функция для проверки всех веб-сайтов
+
 async def main():
     websites = Website.select()
     tasks = [check_website(website) for website in websites]
