@@ -45,6 +45,7 @@ async def check_website(website, retry=False):
         elif await is_internet_available():
             time.sleep(1)
             await check_website(website, retry=True)
+            return
         else:
             return
 
