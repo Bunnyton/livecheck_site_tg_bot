@@ -11,7 +11,7 @@ import time
 bot = telegram.Bot(token=TELEGRAM_API_KEY)
 
 # Функция для проверки статуса веб-сайтов
-async def check_website(website, ssl_context):
+async def check_website(website):
     url = website.url
 
     status_code = 0
@@ -47,7 +47,7 @@ async def check_website(website, ssl_context):
 # Асинхронная функция для проверки всех веб-сайтов
 async def main():
     websites = Website.select()
-    tasks = [check_website(website, ssl_context) for website in websites]
+    tasks = [check_website(website) for website in websites]
     await asyncio.gather(*tasks)
 
 # Запуск основной асинхронной функции
